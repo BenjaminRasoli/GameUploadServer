@@ -2,6 +2,7 @@
 using GameUploadServer.Modals;
 using GameUploadServer.Modals.ViewModals;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameUploadServer.Controllers
 {
@@ -19,14 +20,24 @@ namespace GameUploadServer.Controllers
             _appDBContext = appDBContext;
         }
 
-        [HttpGet("{projectId}/comments")]
-        public IActionResult GetCommentsForProject(int projectId)
+        [HttpGet]
+        public async Task <IActionResult> GetCommentsForProject()
         {
-            var _data = _appDBContext.UserProjects.FirstOrDefault(x => x.Id == projectId);
+            var _data = await _appDBContext.UserComments.ToListAsync();
 
 
             return Ok(_data);
         }
+        [HttpGet("{ProjectDataId}")]
+        public async Task<IActionResult> GetById(int ProjectDataId)
+        {
+            var comments = await _appDBContext.UserComments
+                                           .Where(comment => comment.ProjectDataId == ProjectDataId)
+                                            .ToListAsync();
+
+            return Ok(comments);
+        }
+
 
 
         [HttpPost]
@@ -36,7 +47,9 @@ namespace GameUploadServer.Controllers
             var _data = new CommentData()
             {
                 ProjectComment = data.ProjectComment,
-                ProjectDataId = data.ProjectDataId
+                ProjectDataId = data.ProjectDataId,
+                CommentOwner = data.CommentOwner,
+                CommentName = data.CommentName
 
 
             };
@@ -45,6 +58,49 @@ namespace GameUploadServer.Controllers
           await  _appDBContext.SaveChangesAsync();
 
             return Ok(_data);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdatedById(int id, CommentViewModel data)
+        {
+            var _data = _appDBContext.UserComments.FirstOrDefault(x => x.Id == id);
+
+            if (_data != null)
+            {
+                _data.ProjectComment = data.ProjectComment;
+                _data.ProjectDataId = data.ProjectDataId;
+                _data.CommentOwner = data.CommentOwner;
+                _data.CommentName = data.CommentName;
+
+
+
+
+
+                _appDBContext.UserComments.Update(_data);
+                _appDBContext.SaveChanges();
+            }
+
+            return Ok(_data);
+        }
+
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteById(int id)
+        {
+            var comment = _appDBContext.UserComments.FirstOrDefault(x => x.Id == id);
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            var comments = _appDBContext.UserComments.Where(comment => comment.ProjectDataId == id);
+            _appDBContext.UserComments.RemoveRange(comments);
+
+            _appDBContext.UserComments.Remove(comment);
+            _appDBContext.SaveChanges();
+
+            return Ok();
+
         }
     }
 }

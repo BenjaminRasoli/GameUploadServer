@@ -3,6 +3,7 @@ using GameUploadServer.Data;
 using GameUploadServer.Modals;
 using GameUploadServer.Modals.ViewModals;
 using Microsoft.EntityFrameworkCore;
+using static GameUploadServer.Modals.ViewModals.ProjectViewModel;
 
 namespace GameUploadServer.Controllers
 {
@@ -24,11 +25,21 @@ namespace GameUploadServer.Controllers
 
         [HttpGet]
 
-        public async Task <IEnumerable<ProjectData>> GetProjects()
+        public async Task <IActionResult> GetProjects()
         {
-            var _data = await _appDBContext.UserProjects.ToListAsync();
+            var _data = await _appDBContext.UserProjects
+                .Select(c => new ProjectCommentViewModel()
+                {
+                    Id=c.Id,
+                    ProjectName = c.ProjectName,
+                    ProjectDescription = c.ProjectDescription,
+                    ProjectImageUrl = c.ProjectImageUrl,
+                    ProjectGameId = c.ProjectGameId,
+                    ProjectOwner = c.ProjectOwner,
+                    Comments = c.Comments.Select(comment => comment.ProjectComment).ToList()
+                }).ToListAsync();
 
-            return _data;
+            return Ok(_data);
         }
 
         [HttpGet("{id}")]
@@ -42,20 +53,25 @@ namespace GameUploadServer.Controllers
 
         [HttpPost]
 
-        public IActionResult AddProject(ProjectViewModel data)
+        public IActionResult AddProject([FromForm]ProjectViewModel data)
         {
             var _data = new ProjectData()
             {
                 ProjectName = data.ProjectName,
                 ProjectDescription = data.ProjectDescription,
-                ProjectImage = data.ProjectImage,
-
+                ProjectImageUrl = data.ProjectImageUrl,
+                ProjectGameId = data.ProjectGameId,
+                ProjectOwner = data.ProjectOwner,
             };
+
+      
 
             _appDBContext.UserProjects.Add(_data);
             _appDBContext.SaveChanges();
 
             return Ok(_data);
+
+
         }
 
         [HttpPut("{id}")]
@@ -67,7 +83,9 @@ namespace GameUploadServer.Controllers
             {
                 _data.ProjectName = data.ProjectName;
                 _data.ProjectDescription = data.ProjectDescription;
-                _data.ProjectImage = data.ProjectImage;
+                _data.ProjectImageUrl = data.ProjectImageUrl;
+                _data.ProjectGameId = data.ProjectGameId;
+                _data.ProjectOwner = data.ProjectOwner;
 
 
                 _appDBContext.UserProjects.Update(_data);
@@ -80,12 +98,17 @@ namespace GameUploadServer.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteById(int id)
         {
-            var _data = _appDBContext.UserProjects.FirstOrDefault(x => x.Id == id);
-            if (_data != null)
+            var project = _appDBContext.UserProjects.FirstOrDefault(x => x.Id == id);
+            if (project == null)
             {
-                _appDBContext.UserProjects.Remove(_data);
-                _appDBContext.SaveChanges();
+                return NotFound(); 
             }
+
+            var comments = _appDBContext.UserComments.Where(comment => comment.ProjectDataId == id);
+            _appDBContext.UserComments.RemoveRange(comments);
+
+            _appDBContext.UserProjects.Remove(project);
+            _appDBContext.SaveChanges();
 
             return Ok();
 

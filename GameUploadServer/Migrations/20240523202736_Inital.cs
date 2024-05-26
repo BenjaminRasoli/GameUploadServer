@@ -5,7 +5,7 @@
 namespace GameUploadServer.Migrations
 {
     /// <inheritdoc />
-    public partial class firstMigration : Migration
+    public partial class Inital : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,8 @@ namespace GameUploadServer.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserPassword = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserEmail = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GameIDS = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -33,7 +34,8 @@ namespace GameUploadServer.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProjectName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProjectDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProjectImage = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ProjectImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProjectGameId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,7 +49,7 @@ namespace GameUploadServer.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProjectComment = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProjectDataId = table.Column<int>(type: "int", nullable: false)
+                    ProjectDataId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -56,8 +58,7 @@ namespace GameUploadServer.Migrations
                         name: "FK_UserComments_UserProjects_ProjectDataId",
                         column: x => x.ProjectDataId,
                         principalTable: "UserProjects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(

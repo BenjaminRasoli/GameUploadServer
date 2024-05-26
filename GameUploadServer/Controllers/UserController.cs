@@ -40,9 +40,9 @@ namespace GameUploadServer.Controllers
             var _data = new UserData()
             {
                 UserName = data.UserName,
-                UserPassword = data.UserPassword,
                 UserEmail = data.UserEmail,
-                
+                UserId = data.UserId,
+
             };
 
             _appDBContext.UserDatas.Add(_data);
@@ -62,9 +62,10 @@ namespace GameUploadServer.Controllers
             if (_data != null)
             {
                 _data.UserName = data.UserName;
-                _data.UserPassword = data.UserPassword;
                 _data.UserEmail = data.UserEmail;
-                
+                _data.UserId = data.UserId;
+
+
 
                 _appDBContext.UserDatas.Update(_data);
                 _appDBContext.SaveChanges();

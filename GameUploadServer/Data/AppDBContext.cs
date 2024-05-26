@@ -1,4 +1,6 @@
 ﻿using GameUploadServer.Modals;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameUploadServer.Data
@@ -15,5 +17,7 @@ namespace GameUploadServer.Data
         public DbSet<ProjectData> UserProjects { get; set; }
         public DbSet<CommentData> UserComments { get; set; }
         public DbSet<UserData> UserDatas { get; set; }
+
+   
     }
 }
